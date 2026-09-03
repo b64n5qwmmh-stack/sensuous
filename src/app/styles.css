@@ -22,3 +22,17 @@ select { width: 100%; min-height: 48px; border-radius: 12px; border: 1px solid #
 .scores { display: grid; grid-template-columns: repeat(6, 1fr); gap: 7px; }
 .scores button { min-height: 42px; padding: 0; text-align: center; border-color: #52604e; }
 .scores button.selected { background: #78af5e; color: #10120f; border-color: #b5f095; font-weight: 800; }
+.tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 16px 0; }
+.tabs button { min-height: 44px; padding: 0 8px; text-align: center; }
+.tabs button.selected { background: #78af5e; color: #10120f; font-weight: 800; }
+.team-branch, .ranking { margin-top: 14px; }
+.person-row, .inspection-head { display: flex; justify-content: space-between; align-items: center; width: 100%; min-height: 48px; border: 0; border-top: 1px solid #394236; border-radius: 0; background: transparent; padding: 8px 0; }
+.person-row strong, .inspection-head strong { color: #f7f5ee; }
+.inspection { margin-top: 12px; }
+.inspection-head { text-align: left; }
+.inspection-head span { color: #a9e37c; font-weight: 700; font-size: .85rem; }
+.answers { border-top: 1px solid #394236; margin-top: 8px; }
+.answers p { font-size: .92rem; }
+.back { min-height: 40px; border: 0; background: transparent; padding: 0; color: #a9e37c; }
+.section-title { margin-top: 24px; }
+.compact { margin-top: 12px; }
