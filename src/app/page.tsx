@@ -12,7 +12,7 @@ type CheckIn = { id?: string; checkInTime: string; distanceMeters: number; statu
 type Dashboard = {
   attendance: CheckIn[];
   inspections: { id: string; title: string; status: string; score: number | null; date: string | null }[];
-  kpi: { score: number | null; status: string; period: string | null } | null;
+  kpi: { score: number | null; branchScore: number | null; eligible: boolean; status: string; period: string | null } | null;
 };
 type Panel = "attendance" | "inspections" | "kpi" | null;
 
@@ -143,7 +143,7 @@ export default function HomePage() {
           {panel === "kpi" && (
             <section className="card details">
               <h2>Мой KPI</h2>
-              {dashboard?.kpi ? <p><strong>{dashboard.kpi.score ?? "—"}%</strong><br />{dashboard.kpi.status}{dashboard.kpi.period ? ` · ${new Date(dashboard.kpi.period).toLocaleDateString("ru-RU")}` : ""}</p> : <p>KPI за период ещё не рассчитан.</p>}
+              {dashboard?.kpi ? <p><strong>{dashboard.kpi.score ?? "—"}%</strong><br />KPI филиала: {dashboard.kpi.branchScore ?? "—"}%<br />Допуск к KPI: {dashboard.kpi.eligible ? "да" : "нет"}<br />{dashboard.kpi.status}{dashboard.kpi.period ? ` · ${new Date(dashboard.kpi.period).toLocaleDateString("ru-RU")}` : ""}</p> : <p>KPI за период ещё не рассчитан.</p>}
             </section>
           )}
         </>
