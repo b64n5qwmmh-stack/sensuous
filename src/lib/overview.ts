@@ -1,5 +1,6 @@
 import { Client } from "@notionhq/client";
 import { env } from "@/lib/env";
+import { grantRecognition } from "@/lib/gamification";
 
 const notion = new Client({ auth: env.NOTION_API_KEY });
 const DB = {
@@ -97,4 +98,5 @@ export async function createRecognition(input: { employeeId: string; employeeNam
     "Given By": { relation: [{ id: input.givenBy }] }, Branch: { relation: input.branchId ? [{ id: input.branchId }] : [] }, Date: { date: { start: new Date().toISOString() } },
     Type: { select: { name: "Award" } }, Points: { number: input.period === "month" ? 1 : 12 }, Reason: { rich_text: [{ text: { content: label } }] },
   } });
+  await grantRecognition({ id: input.employeeId, fullName: input.employeeName, telegramId: null, status: null, role: null, primaryBranch: input.branchId, coinBalance: 0, experiencePoints: 0, level: 1 }, input.period);
 }
