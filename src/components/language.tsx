@@ -1,0 +1,25 @@
+"use client";
+
+import { useEffect, useState } from "react";
+
+export type Language = "ru" | "az";
+
+const copy: Record<Language, Record<string, string>> = {
+  ru: {
+    loading: "Проверяем доступ…", openTelegram: "Открой панель через Telegram-бота.", unlinked: "Профиль ещё не привязан", currentKpi: "Текущий KPI", yearKpi: "Годовой KPI", level: "Уровень", onWork: "Я на работе", alreadyWork: "Вы уже на работе", journal: "Мой журнал", myChecks: "Мои проверки", myKpi: "Мой KPI", inspect: "Провести проверку", team: "Команда и рейтинг", achievements: "Достижения", store: "SENSUM Магазин", recentAttendance: "Последние отметки", noAttendance: "Отметок пока нет.", noChecks: "Проверок пока нет.", branchKpi: "KPI филиала", eligible: "Допуск к KPI", yes: "да", no: "нет", backHome: "← Главная", chooseChecklist: "Выберите чек-лист", chooseEmployee: "Выберите сотрудника", openChecklist: "Открыть чек-лист", finishInspection: "Завершить проверку", saving: "Сохраняем…", teamRating: "Команда и рейтинг", branches: "Филиалы", month: "Месяц", year: "Год", monthRating: "Рейтинг месяца", yearRating: "Рейтинг года", employeeCard: "КАРТОЧКА СОТРУДНИКА", backTeam: "← Команда", checks: "Проверки", checkedBy: "Проверил", employeeMonth: "Выбрать сотрудником месяца", employeeYear: "Выбрать сотрудником года", noCalculated: "Появится после первых рассчитанных KPI.", achievementsSoon: "Скоро здесь появятся твои значки", achievementsText: "За пунктуальность, высокий KPI, качественные проверки и лидерство в рейтинге.", storeSoon: "Скоро откроется", storeText: "Здесь можно будет обменять монеты на награды и привилегии Sensum.", gamification: "ГЕЙМИФИКАЦИЯ", rewards: "SENSUM REWARDS", language: "Язык",
+  },
+  az: {
+    loading: "Giriş yoxlanılır…", openTelegram: "Paneli Telegram bot vasitəsilə açın.", unlinked: "Profil hələ bağlanmayıb", currentKpi: "Cari KPI", yearKpi: "İllik KPI", level: "Səviyyə", onWork: "İşdəyəm", alreadyWork: "Artıq işdəsiniz", journal: "Gəliş jurnalım", myChecks: "Yoxlamalarım", myKpi: "Mənim KPI", inspect: "Yoxlama apar", team: "Komanda və reytinq", achievements: "Nailiyyətlər", store: "SENSUM Mağazası", recentAttendance: "Son gəlişlər", noAttendance: "Hələ gəliş qeydi yoxdur.", noChecks: "Hələ yoxlama yoxdur.", branchKpi: "Filial KPI", eligible: "KPI uyğunluğu", yes: "bəli", no: "xeyr", backHome: "← Ana səhifə", chooseChecklist: "Yoxlama siyahısını seçin", chooseEmployee: "Əməkdaşı seçin", openChecklist: "Siyahını aç", finishInspection: "Yoxlamanı tamamla", saving: "Saxlanılır…", teamRating: "Komanda və reytinq", branches: "Filiallar", month: "Ay", year: "İl", monthRating: "Ayın reytinqi", yearRating: "İlin reytinqi", employeeCard: "ƏMƏKDAŞ KARTI", backTeam: "← Komanda", checks: "Yoxlamalar", checkedBy: "Yoxlayan", employeeMonth: "Ayın əməkdaşı seç", employeeYear: "İlin əməkdaşı seç", noCalculated: "İlk hesablanmış KPI-dən sonra görünəcək.", achievementsSoon: "Nişanlarınız tezliklə burada görünəcək", achievementsText: "Vaxtında gəlmək, yüksək KPI, keyfiyyətli yoxlamalar və reytinq liderliyi üçün.", storeSoon: "Tezliklə açılacaq", storeText: "Burada monetləri Sensum mükafatları və imtiyazlarına dəyişmək mümkün olacaq.", gamification: "OYUNLAŞDIRMA", rewards: "SENSUM MÜKAFATLARI", language: "Dil",
+  },
+};
+
+export function useLanguage() {
+  const [lang, setState] = useState<Language>("ru");
+  useEffect(() => { const saved = window.localStorage.getItem("sensum-language"); if (saved === "az" || saved === "ru") setState(saved); }, []);
+  function setLang(value: Language) { window.localStorage.setItem("sensum-language", value); setState(value); }
+  return { lang, setLang, t: (key: string) => copy[lang][key] ?? key };
+}
+
+export function LanguageSwitch({ lang, setLang, label }: { lang: Language; setLang: (value: Language) => void; label: string }) {
+  return <section className="language-switch"><span>{label}</span><button className={lang === "ru" ? "selected" : ""} onClick={() => setLang("ru")}>Русский</button><button className={lang === "az" ? "selected" : ""} onClick={() => setLang("az")}>Azərbaycanca</button></section>;
+}
