@@ -36,3 +36,18 @@ select { width: 100%; min-height: 48px; border-radius: 12px; border: 1px solid #
 .back { min-height: 40px; border: 0; background: transparent; padding: 0; color: #a9e37c; }
 .section-title { margin-top: 24px; }
 .compact { margin-top: 12px; }
+.home { padding-top: 24px; }
+.game-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+.owl-coins { display: flex; align-items: center; gap: 7px; border: 1px solid #7e9f54; background: #1f2c1d; border-radius: 16px; padding: 9px 12px; font-size: 1.2rem; }
+.owl-coins strong { color: #e6cc69; font-size: 1rem; }
+.user-status { display: grid; text-align: right; gap: 2px; }
+.user-status strong { color: #f7f5ee; }
+.user-status span { font-size: .75rem; color: #a9e37c; }
+.stats-card { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: #394236; border: 1px solid #394236; border-radius: 18px; overflow: hidden; margin-bottom: 16px; }
+.stats-card div { min-width: 0; background: rgba(26,31,25,.95); padding: 14px 10px; display: grid; gap: 5px; }
+.stats-card span { font-size: .7rem; line-height: 1.1; color: #a8ada2; }
+.stats-card strong { color: #f7f5ee; font-size: 1.2rem; }
+.menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.menu-tile { min-height: 112px; text-align: left; display: grid; align-content: space-between; padding: 14px; border-color: #455c3f; background: linear-gradient(135deg, #263523, #1a2218); }
+.menu-tile span { font-size: 1.75rem; line-height: 1; }
+.menu-tile small { color: #edf5e9; font-size: .84rem; line-height: 1.2; }
