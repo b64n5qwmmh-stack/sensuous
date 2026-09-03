@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { LanguageSwitch, useLanguage } from "@/components/language";
 
 type PanelState =
   | { kind: "loading" }
@@ -14,9 +15,9 @@ type Panel = "attendance" | "inspections" | "kpi" | null;
 declare global { interface Window { Telegram?: { WebApp?: { ready(): void; expand(): void; initData: string } } } }
 
 const menu = [
-  ["📍", "Я на работе", "checkin"], ["🕒", "Мой журнал", "attendance"], ["📝", "Мои проверки", "inspections"],
-  ["📈", "Мой KPI", "kpi"], ["✅", "Провести проверку", "/check"], ["🏆", "Команда и рейтинг", "/team"],
-  ["🎖️", "Достижения", "/achievements"], ["🛍️", "SENSUM Магазин", "/store"],
+  ["📍", "onWork", "checkin"], ["🕒", "journal", "attendance"], ["📝", "myChecks", "inspections"],
+  ["📈", "myKpi", "kpi"], ["✅", "inspect", "/check"], ["🏆", "team", "/team"],
+  ["🎖️", "achievements", "/achievements"], ["🛍️", "store", "/store"],
 ] as const;
 
 export default function HomePage() {
@@ -25,6 +26,7 @@ export default function HomePage() {
   const [checkingIn, setCheckingIn] = useState(false);
   const [dashboard, setDashboard] = useState<Dashboard | null>(null);
   const [panel, setPanel] = useState<Panel>(null);
+  const { lang, setLang, t } = useLanguage();
 
   useEffect(() => {
     const app = window.Telegram?.WebApp; app?.ready(); app?.expand();
@@ -61,17 +63,18 @@ export default function HomePage() {
   }
 
   return <main className="home">
-    {state.kind === "loading" && <section className="card">Проверяем доступ…</section>}
+    {state.kind === "loading" && <section className="card">{t("loading")}</section>}
     {state.kind === "error" && <section className="card warning">{state.message}</section>}
-    {state.kind === "unlinked" && <section className="card warning"><h2>Профиль ещё не привязан</h2><p>Твой Telegram ID: <code>{state.telegramId}</code></p></section>}
+    {state.kind === "unlinked" && <section className="card warning"><h2>{t("unlinked")}</h2><p>Telegram ID: <code>{state.telegramId}</code></p></section>}
     {state.kind === "ready" && <>
       <header className="game-header"><div className="owl-coins">🦉 <strong>{state.coins}</strong></div><div className="user-status"><strong>{state.name}</strong><span>● {state.status}</span></div></header>
-      <section className="stats-card"><div><span>Текущий KPI</span><strong>{dashboard?.kpi?.score ?? "—"}%</strong></div><div><span>Годовой KPI</span><strong>{dashboard?.yearKpi ?? "—"}%</strong></div><div><span>Уровень</span><strong>{state.level}</strong></div></section>
+      <section className="stats-card"><div><span>{t("currentKpi")}</span><strong>{dashboard?.kpi?.score ?? "—"}%</strong></div><div><span>{t("yearKpi")}</span><strong>{dashboard?.yearKpi ?? "—"}%</strong></div><div><span>{t("level")}</span><strong>{state.level}</strong></div></section>
       {checkIn && <section className="card success"><p className="eyebrow">{checkIn.alreadyCheckedIn ? "УЖЕ ОТМЕЧЕН" : "ОТМЕТКА СОХРАНЕНА"}</p><h2>{new Date(checkIn.checkInTime).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" })}</h2><p>{checkIn.branch ? `${checkIn.branch} · ` : ""}{Math.round(checkIn.distanceMeters)} м от точки филиала</p></section>}
-      <section className="menu-grid">{menu.map(([icon, label, action]) => <button className="menu-tile" key={label} onClick={() => choose(action)} disabled={action === "checkin" && (checkingIn || Boolean(checkIn))}><span>{action === "checkin" && checkingIn ? "⌛" : icon}</span><small>{action === "checkin" && checkIn ? "Вы уже на работе" : label}</small></button>)}</section>
-      {panel === "attendance" && <section className="card details"><h2>Последние отметки</h2>{dashboard?.attendance.length ? dashboard.attendance.map((item, index) => <p key={item.id ?? index}>{new Date(item.checkInTime).toLocaleString("ru-RU", { timeZone: "Asia/Baku", day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })} · {item.status} · {Math.round(item.distanceMeters)} м</p>) : <p>Отметок пока нет.</p>}</section>}
-      {panel === "inspections" && <section className="card details"><h2>Мои проверки</h2>{dashboard?.inspections.length ? dashboard.inspections.map((item) => <p key={item.id}><strong>{item.title}</strong><br />{item.status}{item.score !== null ? ` · ${item.score}%` : ""}{item.date ? ` · ${new Date(item.date).toLocaleDateString("ru-RU")}` : ""}</p>) : <p>Проверок пока нет.</p>}</section>}
-      {panel === "kpi" && <section className="card details"><h2>Мой KPI</h2>{dashboard?.kpi ? <p><strong>{dashboard.kpi.score ?? "—"}%</strong><br />KPI филиала: {dashboard.kpi.branchScore ?? "—"}%<br />Допуск к KPI: {dashboard.kpi.eligible ? "да" : "нет"}</p> : <p>KPI за период ещё не рассчитан.</p>}</section>}
+      <section className="menu-grid">{menu.map(([icon, label, action]) => <button className="menu-tile" key={label} onClick={() => choose(action)} disabled={action === "checkin" && (checkingIn || Boolean(checkIn))}><span>{action === "checkin" && checkingIn ? "⌛" : icon}</span><small>{action === "checkin" && checkIn ? t("alreadyWork") : t(label)}</small></button>)}</section>
+      <LanguageSwitch lang={lang} setLang={setLang} label={t("language")} />
+      {panel === "attendance" && <section className="card details"><h2>{t("recentAttendance")}</h2>{dashboard?.attendance.length ? dashboard.attendance.map((item, index) => <p key={item.id ?? index}>{new Date(item.checkInTime).toLocaleString(lang === "az" ? "az-AZ" : "ru-RU", { timeZone: "Asia/Baku", day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })} · {item.status} · {Math.round(item.distanceMeters)} m</p>) : <p>{t("noAttendance")}</p>}</section>}
+      {panel === "inspections" && <section className="card details"><h2>{t("myChecks")}</h2>{dashboard?.inspections.length ? dashboard.inspections.map((item) => <p key={item.id}><strong>{item.title}</strong><br />{item.status}{item.score !== null ? ` · ${item.score}%` : ""}{item.date ? ` · ${new Date(item.date).toLocaleDateString(lang === "az" ? "az-AZ" : "ru-RU")}` : ""}</p>) : <p>{t("noChecks")}</p>}</section>}
+      {panel === "kpi" && <section className="card details"><h2>{t("myKpi")}</h2>{dashboard?.kpi ? <p><strong>{dashboard.kpi.score ?? "—"}%</strong><br />{t("branchKpi")}: {dashboard.kpi.branchScore ?? "—"}%<br />{t("eligible")}: {dashboard.kpi.eligible ? t("yes") : t("no")}</p> : <p>KPI —</p>}</section>}
     </>}
   </main>;
 }
