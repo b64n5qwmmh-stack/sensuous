@@ -4,6 +4,7 @@ import {
   getEmployeeInspections,
   getLatestKpi,
   getRecentCheckIns,
+  getYearKpi,
 } from "@/lib/notion";
 import { validateTelegramInitData } from "@/lib/telegram";
 
@@ -16,12 +17,13 @@ export async function POST(request: NextRequest) {
     const employee = await findEmployeeByTelegramId(telegramUser.id);
     if (!employee) return NextResponse.json({ error: "Your Telegram ID is not linked to an employee." }, { status: 403 });
 
-    const [attendance, inspections, kpi] = await Promise.all([
+    const [attendance, inspections, kpi, yearKpi] = await Promise.all([
       getRecentCheckIns(employee.id),
       getEmployeeInspections(employee.id),
       getLatestKpi(employee.id),
+      getYearKpi(employee.id),
     ]);
-    return NextResponse.json({ attendance, inspections, kpi });
+    return NextResponse.json({ attendance, inspections, kpi, yearKpi });
   } catch (error) {
     return NextResponse.json({ error: error instanceof Error ? error.message : "Could not load dashboard." }, { status: 400 });
   }
