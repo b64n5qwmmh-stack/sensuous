@@ -54,3 +54,10 @@ select { width: 100%; min-height: 48px; border-radius: 12px; border: 1px solid #
 .language-switch { display: flex; align-items: center; justify-content: flex-end; gap: 7px; margin-top: 20px; color: #a8ada2; font-size: .78rem; }
 .language-switch button { min-height: 34px; padding: 0 10px; border-radius: 10px; font-size: .74rem; }
 .language-switch button.selected { color: #10120f; background: #a9e37c; border-color: #a9e37c; }
+.achievement-grid, .store-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.achievement, .store-item { border: 1px solid #394236; border-radius: 18px; padding: 14px; background: rgba(26,31,25,.85); display: grid; gap: 8px; }
+.achievement { opacity: .55; }.achievement.earned { opacity: 1; border-color: #a9e37c; }
+.achievement span, .store-item > span { font-size: 1.6rem; }.achievement p, .store-item p { font-size: .8rem; margin: 0; }
+.achievement small, .store-item > strong { color: #e6cc69; }.store-item h2 { font-size: 1rem; }.store-item button { min-height: 40px; text-align: center; padding: 0 8px; }
+.coin-banner { margin-bottom: 14px; border-radius: 16px; padding: 12px 14px; background: #1f2c1d; border: 1px solid #7e9f54; color: #e6cc69; font-weight: 800; }
+.positive { color: #a9e37c; }.negative { color: #ff8c8c; }
