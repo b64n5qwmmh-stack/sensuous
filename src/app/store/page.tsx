@@ -1,2 +1,3 @@
 "use client";
-export default function StorePage() { return <main><button className="back" onClick={() => { window.location.href = "/"; }}>← Главная</button><p className="eyebrow">SENSUM REWARDS</p><h1>Магазин</h1><section className="card"><h2>Скоро откроется</h2><p>Здесь можно будет обменять монеты на награды и привилегии Sensum.</p></section></main>; }
+import { LanguageSwitch, useLanguage } from "@/components/language";
+export default function StorePage() { const {lang,setLang,t}=useLanguage(); return <main><button className="back" onClick={() => { window.location.href = "/"; }}>{t("backHome")}</button><p className="eyebrow">{t("rewards")}</p><h1>{t("store")}</h1><section className="card"><h2>{t("storeSoon")}</h2><p>{t("storeText")}</p></section><LanguageSwitch lang={lang} setLang={setLang} label={t("language")} /></main>; }
