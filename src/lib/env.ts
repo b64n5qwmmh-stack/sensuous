@@ -12,6 +12,8 @@ const schema = z.object({
   NOTION_SHIFTS_DATA_SOURCE_ID: optionalValue(z.string().uuid()),
   NOTION_ATTENDANCE_DATA_SOURCE_ID: optionalValue(z.string().uuid()),
   NOTION_SCHEDULE_IMPORTS_DATA_SOURCE_ID: optionalValue(z.string().uuid()),
+  NOTION_INSPECTIONS_DATA_SOURCE_ID: optionalValue(z.string().uuid()),
+  NOTION_KPI_RESULTS_DATA_SOURCE_ID: optionalValue(z.string().uuid()),
 });
 
 export const env = schema.parse({
@@ -23,4 +25,6 @@ export const env = schema.parse({
   NOTION_SHIFTS_DATA_SOURCE_ID: process.env.NOTION_SHIFTS_DATA_SOURCE_ID,
   NOTION_ATTENDANCE_DATA_SOURCE_ID: process.env.NOTION_ATTENDANCE_DATA_SOURCE_ID,
   NOTION_SCHEDULE_IMPORTS_DATA_SOURCE_ID: process.env.NOTION_SCHEDULE_IMPORTS_DATA_SOURCE_ID,
+  NOTION_INSPECTIONS_DATA_SOURCE_ID: process.env.NOTION_INSPECTIONS_DATA_SOURCE_ID,
+  NOTION_KPI_RESULTS_DATA_SOURCE_ID: process.env.NOTION_KPI_RESULTS_DATA_SOURCE_ID,
 });
