@@ -80,6 +80,8 @@ export async function getBranch(branchId: string): Promise<Branch> {
 }
 
 export type CheckInRecord = { id: string; checkInTime: string; distanceMeters: number; status: string };
+export type InspectionRecord = { id: string; title: string; status: string; score: number | null; date: string | null };
+export type KpiRecord = { score: number | null; status: string; period: string | null };
 
 function dateStart(property: unknown): string | null {
   const value = property as { date?: { start?: string } | null };
@@ -116,6 +118,70 @@ export async function getTodayCheckIn(employeeId: string): Promise<CheckInRecord
   if (!checkInTime) return null;
   const select = properties["Check-in Status"] as { select?: { name: string } | null };
   return { id: page.id, checkInTime, distanceMeters: number(properties["Distance from Branch (m)"]) ?? 0, status: select?.select?.name ?? "Unknown" };
+}
+
+export async function getRecentCheckIns(employeeId: string): Promise<CheckInRecord[]> {
+  if (!notion || !env.NOTION_ATTENDANCE_DATA_SOURCE_ID) return [];
+  const response = await notion.databases.query({
+    database_id: env.NOTION_ATTENDANCE_DATA_SOURCE_ID,
+    filter: { property: "Employee", relation: { contains: employeeId } },
+    sorts: [{ property: "Check-in Time", direction: "descending" }],
+    page_size: 7,
+  });
+  return response.results.flatMap((page) => {
+    if (!("properties" in page)) return [];
+    const properties = page.properties as Record<string, unknown>;
+    const checkInTime = dateStart(properties["Check-in Time"]);
+    if (!checkInTime) return [];
+    const select = properties["Check-in Status"] as { select?: { name: string } | null };
+    return [{
+      id: page.id,
+      checkInTime,
+      distanceMeters: number(properties["Distance from Branch (m)"]) ?? 0,
+      status: select?.select?.name ?? "Unknown",
+    }];
+  });
+}
+
+export async function getEmployeeInspections(employeeId: string): Promise<InspectionRecord[]> {
+  if (!notion || !env.NOTION_INSPECTIONS_DATA_SOURCE_ID) return [];
+  const response = await notion.databases.query({
+    database_id: env.NOTION_INSPECTIONS_DATA_SOURCE_ID,
+    filter: { property: "Employee Checked", relation: { contains: employeeId } },
+    sorts: [{ property: "Date", direction: "descending" }],
+    page_size: 10,
+  });
+  return response.results.flatMap((page) => {
+    if (!("properties" in page)) return [];
+    const properties = page.properties as Record<string, unknown>;
+    const select = properties.Status as { select?: { name: string } | null };
+    return [{
+      id: page.id,
+      title: text(properties.Inspection) ?? "Проверка",
+      status: select?.select?.name ?? "Без статуса",
+      score: number(properties["Score (%)"]),
+      date: dateStart(properties.Date),
+    }];
+  });
+}
+
+export async function getLatestKpi(employeeId: string): Promise<KpiRecord | null> {
+  if (!notion || !env.NOTION_KPI_RESULTS_DATA_SOURCE_ID) return null;
+  const response = await notion.databases.query({
+    database_id: env.NOTION_KPI_RESULTS_DATA_SOURCE_ID,
+    filter: { property: "Employee", relation: { contains: employeeId } },
+    sorts: [{ property: "Period", direction: "descending" }],
+    page_size: 1,
+  });
+  const page = response.results[0];
+  if (!page || !("properties" in page)) return null;
+  const properties = page.properties as Record<string, unknown>;
+  const select = properties.Status as { select?: { name: string } | null };
+  return {
+    score: number(properties["KPI Score"]),
+    status: select?.select?.name ?? "Без статуса",
+    period: dateStart(properties.Period),
+  };
 }
 
 export async function createCheckIn(input: {
