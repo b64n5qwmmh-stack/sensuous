@@ -15,6 +15,9 @@ export type Employee = {
   status: string | null;
   role: string | null;
   primaryBranch: string | null;
+  coinBalance: number;
+  experiencePoints: number;
+  level: number;
 };
 
 export type Branch = {
@@ -57,6 +60,9 @@ export async function findEmployeeByTelegramId(telegramId: number): Promise<Empl
     status: select?.select?.name ?? null,
     role: role?.relation?.[0]?.id ?? null,
     primaryBranch: branch?.relation?.[0]?.id ?? null,
+    coinBalance: number(properties["Coin Balance"]) ?? 0,
+    experiencePoints: number(properties["Experience Points"]) ?? 0,
+    level: number(properties.Level) ?? 1,
   };
 }
 
@@ -185,6 +191,21 @@ export async function getLatestKpi(employeeId: string): Promise<KpiRecord | null
     status: select?.select?.name ?? "Без статуса",
     period: dateStart(properties.Period),
   };
+}
+
+export async function getYearKpi(employeeId: string): Promise<number | null> {
+  if (!notion || !env.NOTION_KPI_RESULTS_DATA_SOURCE_ID) return null;
+  const year = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Baku", year: "numeric" }).format(new Date());
+  const response = await notion.databases.query({
+    database_id: env.NOTION_KPI_RESULTS_DATA_SOURCE_ID,
+    filter: { and: [
+      { property: "Employee", relation: { contains: employeeId } },
+      { property: "Period", date: { on_or_after: `${year}-01-01T00:00:00+04:00` } },
+    ] },
+    page_size: 100,
+  });
+  const scores = response.results.flatMap((page) => "properties" in page ? [number(page.properties["KPI Score"])] : []).filter((score): score is number => score !== null);
+  return scores.length ? Math.round(scores.reduce((sum, score) => sum + score, 0) / scores.length) : null;
 }
 
 export async function createCheckIn(input: {
