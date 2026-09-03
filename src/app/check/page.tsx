@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { LanguageSwitch, useLanguage } from "@/components/language";
 
 type Option = { typeId: string; typeName: string; employees: { id: string; name: string }[] };
 type Question = { id: string; text: string };
@@ -20,6 +21,7 @@ export default function CheckPage() {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const { lang, setLang, t } = useLanguage();
   const initData = typeof window === "undefined" ? "" : window.Telegram?.WebApp?.initData ?? "";
   const option = options.find((item) => item.typeId === pick);
 
@@ -81,29 +83,30 @@ export default function CheckPage() {
   }
 
   return <main>
-    <button className="back" onClick={() => { window.location.href = "/"; }}>← Главная</button>
+    <button className="back" onClick={() => { window.location.href = "/"; }}>{t("backHome")}</button>
     <p className="eyebrow">SENSUM STAFF OS</p>
-    <h1>Провести проверку</h1>
+    <h1>{t("inspect")}</h1>
     {message && <section className="card warning">{message}</section>}
     {loading ? <section className="card">Загружаем доступные проверки…</section> : <section className="card">
-      <label>Чек-лист
+      <label>{lang === "az" ? "Yoxlama siyahısı" : "Чек-лист"}
         <select value={pick} onChange={(event) => { setPick(event.target.value); setTarget(""); setQuestions([]); setAnswers({}); }}>
-          <option value="">Выберите чек-лист</option>
+          <option value="">{t("chooseChecklist")}</option>
           {options.map((item) => <option key={item.typeId} value={item.typeId}>{item.typeName}</option>)}
         </select>
       </label>
-      {option && <label>Сотрудник
+      {option && <label>{lang === "az" ? "Əməkdaş" : "Сотрудник"}
         <select value={target} onChange={(event) => { setTarget(event.target.value); setQuestions([]); setAnswers({}); }}>
-          <option value="">Выберите сотрудника</option>
+          <option value="">{t("chooseEmployee")}</option>
           {option.employees.map((employee) => <option key={employee.id} value={employee.id}>{employee.name}</option>)}
         </select>
       </label>}
-      <button onClick={openChecklist} disabled={!pick || !target}>Открыть чек-лист</button>
+      <button onClick={openChecklist} disabled={!pick || !target}>{t("openChecklist")}</button>
       {questions.map((question, index) => <div className="question" key={question.id}>
         <p><strong>{index + 1}. {question.text}</strong></p>
         <div className="scores">{["1", "2", "3", "4", "5", "Skip"].map((score) => <button className={answers[question.id] === score ? "selected" : ""} key={score} onClick={() => setAnswers({ ...answers, [question.id]: score })}>{score}</button>)}</div>
       </div>)}
-      {questions.length > 0 && <button onClick={submit} disabled={saving}>{saving ? "Сохраняем…" : "Завершить проверку"}</button>}
+      {questions.length > 0 && <button onClick={submit} disabled={saving}>{saving ? t("saving") : t("finishInspection")}</button>}
+      <LanguageSwitch lang={lang} setLang={setLang} label={t("language")} />
     </section>}
   </main>;
 }
