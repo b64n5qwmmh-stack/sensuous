@@ -51,3 +51,6 @@ select { width: 100%; min-height: 48px; border-radius: 12px; border: 1px solid #
 .menu-tile { min-height: 112px; text-align: left; display: grid; align-content: space-between; padding: 14px; border-color: #455c3f; background: linear-gradient(135deg, #263523, #1a2218); }
 .menu-tile span { font-size: 1.75rem; line-height: 1; }
 .menu-tile small { color: #edf5e9; font-size: .84rem; line-height: 1.2; }
+.language-switch { display: flex; align-items: center; justify-content: flex-end; gap: 7px; margin-top: 20px; color: #a8ada2; font-size: .78rem; }
+.language-switch button { min-height: 34px; padding: 0 10px; border-radius: 10px; font-size: .74rem; }
+.language-switch button.selected { color: #10120f; background: #a9e37c; border-color: #a9e37c; }
