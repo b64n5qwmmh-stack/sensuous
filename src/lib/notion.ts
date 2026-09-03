@@ -132,6 +132,16 @@ export async function createCheckIn(input: {
     "NOTION_ATTENDANCE_DATA_SOURCE_ID"
   );
   const now = new Date().toISOString();
+  const bakuTime = new Intl.DateTimeFormat("ru-RU", {
+    timeZone: "Asia/Baku",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  }).format(new Date());
   const title = `${input.employee.fullName} — ${now.slice(0, 10)}`;
   const page = await notion.pages.create({
     parent: { database_id: attendanceDataSourceId },
@@ -140,6 +150,7 @@ export async function createCheckIn(input: {
       Employee: { relation: [{ id: input.employee.id }] },
       Branch: { relation: [{ id: input.branch.id }] },
       "Check-in Time": { date: { start: now } },
+      "Check-in Time (Baku)": { rich_text: [{ text: { content: bakuTime } }] },
       "Check-in Latitude": { number: input.latitude },
       "Check-in Longitude": { number: input.longitude },
       "Distance from Branch (m)": { number: Math.round(input.distanceMeters) },
