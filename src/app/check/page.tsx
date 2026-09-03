@@ -81,6 +81,7 @@ export default function CheckPage() {
   }
 
   return <main>
+    <button className="back" onClick={() => { window.location.href = "/"; }}>← Главная</button>
     <p className="eyebrow">SENSUM STAFF OS</p>
     <h1>Провести проверку</h1>
     {message && <section className="card warning">{message}</section>}
