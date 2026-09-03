@@ -1,14 +1,17 @@
 import { z } from "zod";
 
+const optionalValue = <T extends z.ZodTypeAny>(schema: T) =>
+  z.preprocess((value) => (value === "" || value === undefined ? undefined : value), schema.optional());
+
 const schema = z.object({
-  APP_URL: z.string().url().optional(),
-  TELEGRAM_BOT_TOKEN: z.string().min(1).optional(),
-  TELEGRAM_WEBHOOK_SECRET: z.string().min(16).optional(),
-  NOTION_API_KEY: z.string().min(1).optional(),
-  NOTION_EMPLOYEES_DATA_SOURCE_ID: z.string().uuid().optional(),
-  NOTION_SHIFTS_DATA_SOURCE_ID: z.string().uuid().optional(),
-  NOTION_ATTENDANCE_DATA_SOURCE_ID: z.string().uuid().optional(),
-  NOTION_SCHEDULE_IMPORTS_DATA_SOURCE_ID: z.string().uuid().optional(),
+  APP_URL: optionalValue(z.string().url()),
+  TELEGRAM_BOT_TOKEN: optionalValue(z.string().min(1)),
+  TELEGRAM_WEBHOOK_SECRET: optionalValue(z.string().min(16)),
+  NOTION_API_KEY: optionalValue(z.string().min(1)),
+  NOTION_EMPLOYEES_DATA_SOURCE_ID: optionalValue(z.string().uuid()),
+  NOTION_SHIFTS_DATA_SOURCE_ID: optionalValue(z.string().uuid()),
+  NOTION_ATTENDANCE_DATA_SOURCE_ID: optionalValue(z.string().uuid()),
+  NOTION_SCHEDULE_IMPORTS_DATA_SOURCE_ID: optionalValue(z.string().uuid()),
 });
 
 export const env = schema.parse({
