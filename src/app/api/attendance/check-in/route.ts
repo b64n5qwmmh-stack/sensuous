@@ -27,13 +27,21 @@ export async function POST(request: NextRequest) {
 
     const branch = await getBranch(employee.primaryBranch);
     const distance = distanceMeters({ latitude: checkInLatitude, longitude: checkInLongitude }, branch);
+    if (distance > branch.radiusMeters) {
+      return NextResponse.json(
+        {
+          error: `Отметка возможна только на территории филиала. Вы на ${Math.round(distance)} м от точки, допустимый радиус — ${branch.radiusMeters} м.`,
+        },
+        { status: 403 },
+      );
+    }
     const record = await createCheckIn({
       employee,
       branch,
       latitude: checkInLatitude,
       longitude: checkInLongitude,
       distanceMeters: distance,
-      insideRadius: distance <= branch.radiusMeters,
+      insideRadius: true,
     });
     return NextResponse.json({ alreadyCheckedIn: false, branch: branch.name, record });
   } catch (error) {
