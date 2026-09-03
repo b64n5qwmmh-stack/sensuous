@@ -81,7 +81,7 @@ export async function getBranch(branchId: string): Promise<Branch> {
 
 export type CheckInRecord = { id: string; checkInTime: string; distanceMeters: number; status: string };
 export type InspectionRecord = { id: string; title: string; status: string; score: number | null; date: string | null };
-export type KpiRecord = { score: number | null; status: string; period: string | null };
+export type KpiRecord = { score: number | null; branchScore: number | null; eligible: boolean; status: string; period: string | null };
 
 function dateStart(property: unknown): string | null {
   const value = property as { date?: { start?: string } | null };
@@ -177,8 +177,11 @@ export async function getLatestKpi(employeeId: string): Promise<KpiRecord | null
   if (!page || !("properties" in page)) return null;
   const properties = page.properties as Record<string, unknown>;
   const select = properties.Status as { select?: { name: string } | null };
+  const eligible = properties["KPI Eligible"] as { checkbox?: boolean };
   return {
     score: number(properties["KPI Score"]),
+    branchScore: number(properties["Branch KPI Score"]),
+    eligible: eligible?.checkbox ?? false,
     status: select?.select?.name ?? "Без статуса",
     period: dateStart(properties.Period),
   };
