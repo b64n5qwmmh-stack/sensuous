@@ -51,6 +51,7 @@ export default function TeamPage() {
   </main>;
 
   return <main>
+    <button className="back" onClick={() => { window.location.href = "/"; }}>← Главная</button>
     <p className="eyebrow">SENSUM STAFF OS</p><h1>Команда и рейтинг</h1>{message && <section className="card warning">{message}</section>}
     {!team ? <section className="card">Загружаем данные…</section> : <>
       <section className="tabs"><button className={mode === "branches" ? "selected" : ""} onClick={() => setMode("branches")}>Филиалы</button><button className={mode === "month" ? "selected" : ""} onClick={() => setMode("month")}>Месяц</button><button className={mode === "year" ? "selected" : ""} onClick={() => setMode("year")}>Год</button></section>
