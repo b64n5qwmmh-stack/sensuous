@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Client } from "@notionhq/client";
 import { findEmployeeByTelegramId } from "@/lib/notion";
 import { inspectionOptions, questions } from "@/lib/inspection";
+import { refreshMonthlyKpi } from "@/lib/kpi";
 import { validateTelegramInitData } from "@/lib/telegram";
 import { env } from "@/lib/env";
 
@@ -29,10 +30,14 @@ export async function POST(request: NextRequest) {
     const marks = qs.map((question) => body.answers[question.id]);
     const counted = marks.filter((mark) => mark !== "Skip");
     const percent = counted.length ? Math.round(counted.reduce((sum, mark) => sum + Number(mark), 0) / counted.length / 5 * 100) : 0;
+    const target = rule.employees.find((person) => person.id === body.targetId)!;
+    const targetPage = await notion.pages.retrieve({ page_id: body.targetId });
+    const targetBranch = "properties" in targetPage ? ((targetPage.properties["Primary Branch"] as { relation?: { id: string }[] })?.relation?.[0]?.id ?? null) : null;
     const page = await notion.pages.create({ parent: { database_id: INSPECTIONS }, properties: {
       Inspection: { title: [{ text: { content: `${rule.typeName} — ${new Date().toLocaleDateString("ru-RU")}` } }] },
       "Employee Checked": { relation: [{ id: body.targetId }] }, Inspector: { relation: [{ id: me.id }] },
       "Check Type": { relation: [{ id: body.typeId }] }, Date: { date: { start: new Date().toISOString() } },
+      Branch: { relation: targetBranch ? [{ id: targetBranch }] : [] }, "Submitted At": { date: { start: new Date().toISOString() } },
       Score: { number: percent }, "Score (%)": { number: percent }, Status: { select: { name: "Submitted" } },
       Summary: { rich_text: body.comment ? [{ text: { content: body.comment } }] : [] },
     } });
@@ -41,7 +46,8 @@ export async function POST(request: NextRequest) {
       Question: { relation: [{ id: question.id }] }, Result: { select: { name: body.answers[question.id] } },
       "Awarded Score": { number: body.answers[question.id] === "Skip" ? 0 : Number(body.answers[question.id]) },
     } })));
-    return NextResponse.json({ ok: true, percent });
+    const kpi = await refreshMonthlyKpi({ employeeId: body.targetId, employeeName: target.name, branchId: targetBranch });
+    return NextResponse.json({ ok: true, percent, kpi });
   } catch (error) { return NextResponse.json({ error: error instanceof Error ? error.message : "Не удалось сохранить проверку." }, { status: 400 }); }
 }
 
