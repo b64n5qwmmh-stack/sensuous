@@ -127,6 +127,7 @@ export default function HomePage() {
             <button onClick={() => setPanel(panel === "inspections" ? null : "inspections")}>Мои проверки</button>
             <button onClick={() => setPanel(panel === "kpi" ? null : "kpi")}>Мой KPI</button>
             <button onClick={() => { window.location.href = "/check"; }}>Провести проверку</button>
+            <button onClick={() => { window.location.href = "/team"; }}>Команда и рейтинг</button>
           </section>
           {panel === "attendance" && (
             <section className="card details">
