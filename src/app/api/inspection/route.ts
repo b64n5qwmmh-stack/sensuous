@@ -3,6 +3,7 @@ import { Client } from "@notionhq/client";
 import { findEmployeeByTelegramId } from "@/lib/notion";
 import { inspectionOptions, questions } from "@/lib/inspection";
 import { refreshMonthlyKpi } from "@/lib/kpi";
+import { grantInspectionRewards } from "@/lib/gamification";
 import { validateTelegramInitData } from "@/lib/telegram";
 import { env } from "@/lib/env";
 
@@ -47,6 +48,7 @@ export async function POST(request: NextRequest) {
       "Awarded Score": { number: body.answers[question.id] === "Skip" ? 0 : Number(body.answers[question.id]) },
     } })));
     const kpi = await refreshMonthlyKpi({ employeeId: body.targetId, employeeName: target.name, branchId: targetBranch });
+    await grantInspectionRewards({ id: body.targetId, fullName: target.name, telegramId: null, status: null, role: null, primaryBranch: targetBranch, coinBalance: 0, experiencePoints: 0, level: 1 }, percent, kpi);
     return NextResponse.json({ ok: true, percent, kpi });
   } catch (error) { return NextResponse.json({ error: error instanceof Error ? error.message : "Не удалось сохранить проверку." }, { status: 400 }); }
 }
