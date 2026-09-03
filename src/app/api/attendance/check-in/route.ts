@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { distanceMeters } from "@/lib/geo";
 import { createCheckIn, findEmployeeByTelegramId, getBranch, getTodayCheckIn } from "@/lib/notion";
 import { validateTelegramInitData } from "@/lib/telegram";
+import { grantTimelyArrival } from "@/lib/gamification";
 
 export async function POST(request: NextRequest) {
   try {
@@ -43,6 +44,7 @@ export async function POST(request: NextRequest) {
       distanceMeters: distance,
       insideRadius: true,
     });
+    await grantTimelyArrival(employee);
     return NextResponse.json({ alreadyCheckedIn: false, branch: branch.name, record });
   } catch (error) {
     return NextResponse.json({ error: error instanceof Error ? error.message : "Check-in failed." }, { status: 400 });
