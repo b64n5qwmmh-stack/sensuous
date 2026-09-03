@@ -74,7 +74,7 @@ export default function CheckPage() {
       setMessage(body.error ?? "Не удалось сохранить проверку.");
       return;
     }
-    setMessage(`Проверка сохранена: ${body.percent}%.`);
+    setMessage(`Проверка сохранена: ${body.percent}%. Личный KPI: ${body.kpi.personalScore}%, KPI филиала: ${body.kpi.branchScore}%. Допуск: ${body.kpi.eligible ? "да" : "нет"}.`);
     setQuestions([]);
     setAnswers({});
     setTarget("");
