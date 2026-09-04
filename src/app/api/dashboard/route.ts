@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   findEmployeeByTelegramId,
   getEmployeeInspections,
+  getEmployeePenalties,
   getLatestKpi,
   getRecentCheckIns,
   getYearKpi,
@@ -17,13 +18,14 @@ export async function POST(request: NextRequest) {
     const employee = await findEmployeeByTelegramId(telegramUser.id);
     if (!employee) return NextResponse.json({ error: "Your Telegram ID is not linked to an employee." }, { status: 403 });
 
-    const [attendance, inspections, kpi, yearKpi] = await Promise.all([
+    const [attendance, inspections, penalties, kpi, yearKpi] = await Promise.all([
       getRecentCheckIns(employee.id),
       getEmployeeInspections(employee.id),
+      getEmployeePenalties(employee.id),
       getLatestKpi(employee.id),
       getYearKpi(employee.id),
     ]);
-    return NextResponse.json({ attendance, inspections, kpi, yearKpi });
+    return NextResponse.json({ attendance, inspections, penalties, kpi, yearKpi });
   } catch (error) {
     return NextResponse.json({ error: error instanceof Error ? error.message : "Could not load dashboard." }, { status: 400 });
   }
