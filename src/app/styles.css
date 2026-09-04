@@ -18,6 +18,8 @@ button { min-height: 52px; border-radius: 14px; border: 1px solid #6f9f60; backg
 button:disabled { border-color: #455643; background: #20271f; color: #8d9789; cursor: default; }
 label { display: grid; gap: 7px; margin-bottom: 14px; color: #cbcec6; font-size: .9rem; }
 select { width: 100%; min-height: 48px; border-radius: 12px; border: 1px solid #52604e; padding: 0 12px; color: #edf5e9; background: #182016; font: inherit; }
+input, textarea { width: 100%; border-radius: 12px; border: 1px solid #52604e; padding: 12px; color: #edf5e9; background: #182016; font: inherit; }
+textarea { min-height: 112px; resize: vertical; }
 .question { border-top: 1px solid #394236; margin-top: 18px; padding-top: 12px; }
 .scores { display: grid; grid-template-columns: repeat(6, 1fr); gap: 7px; }
 .scores button { min-height: 42px; padding: 0; text-align: center; border-color: #52604e; }
@@ -51,6 +53,8 @@ select { width: 100%; min-height: 48px; border-radius: 12px; border: 1px solid #
 .menu-tile { min-height: 112px; text-align: left; display: grid; align-content: space-between; padding: 14px; border-color: #455c3f; background: linear-gradient(135deg, #263523, #1a2218); }
 .menu-tile span { font-size: 1.75rem; line-height: 1; }
 .menu-tile small { color: #edf5e9; font-size: .84rem; line-height: 1.2; }
+.penalty-tile { border-color: #a8664a; background: linear-gradient(135deg, #48261f, #271916); }
+.hint { font-size: .9rem; margin-top: -4px; }.penalty-form { margin-top: 18px; }
 .language-switch { display: flex; align-items: center; justify-content: flex-end; gap: 7px; margin-top: 20px; color: #a8ada2; font-size: .78rem; }
 .language-switch button { min-height: 34px; padding: 0 10px; border-radius: 10px; font-size: .74rem; }
 .language-switch button.selected { color: #10120f; background: #a9e37c; border-color: #a9e37c; }
