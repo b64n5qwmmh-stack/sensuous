@@ -4,6 +4,7 @@ import { env } from "@/lib/env";
 const notion = new Client({ auth: env.NOTION_API_KEY });
 const INSPECTIONS = "d016fcc6-1184-4054-b196-a78cbb33e9cb";
 const KPI_RESULTS = env.NOTION_KPI_RESULTS_DATA_SOURCE_ID ?? "26371f8e-c442-4614-9207-1170933f6200";
+const VIOLATIONS = "ee35a70e-67dc-4e20-93b4-a10a772c7e3e";
 
 const relation = (property: unknown) => ((property as { relation?: { id: string }[] })?.relation ?? []).map((item) => item.id);
 const number = (property: unknown) => (property as { number?: number | null })?.number ?? null;
@@ -33,7 +34,14 @@ export async function refreshMonthlyKpi(input: { employeeId: string; employeeNam
     page_size: 100,
   });
   const scores = inspections.results.flatMap((page) => "properties" in page ? [number(page.properties["Score (%)"])] : []).filter((value): value is number => value !== null);
-  const personalScore = scores.length ? Math.round(scores.reduce((sum, value) => sum + value, 0) / scores.length) : 0;
+  const qualityScore = scores.length ? Math.round(scores.reduce((sum, value) => sum + value, 0) / scores.length) : 0;
+  const violations = await notion.databases.query({ database_id: VIOLATIONS, filter: { and: [
+    { property: "Employee", relation: { contains: input.employeeId } },
+    { property: "Date", date: { on_or_after: period.start } },
+    { property: "Date", date: { before: period.end } },
+  ] }, page_size: 100 });
+  const deduction = violations.results.reduce((sum, page) => sum + ("properties" in page ? number(page.properties["KPI Deduction"]) ?? 0 : 0), 0);
+  const personalScore = Math.max(0, qualityScore - deduction);
 
   const currentResults = await notion.databases.query({
     database_id: KPI_RESULTS,
@@ -49,7 +57,7 @@ export async function refreshMonthlyKpi(input: { employeeId: string; employeeNam
     Employee: { relation: [{ id: input.employeeId }] },
     Branch: { relation: input.branchId ? [{ id: input.branchId }] : [] },
     Period: { date: { start: period.start } },
-    "Quality Score": { number: personalScore },
+    "Quality Score": { number: qualityScore },
     "KPI Score": { number: personalScore },
     Status: { select: { name: "Draft" } },
   };
