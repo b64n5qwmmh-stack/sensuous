@@ -88,6 +88,7 @@ export async function getBranch(branchId: string): Promise<Branch> {
 export type CheckInRecord = { id: string; checkInTime: string; distanceMeters: number; status: string };
 export type InspectionRecord = { id: string; title: string; status: string; score: number | null; date: string | null };
 export type KpiRecord = { score: number | null; branchScore: number | null; eligible: boolean; status: string; period: string | null };
+export type PenaltyRecord = { id: string; title: string; deduction: number; reason: string; date: string | null; severity: string };
 
 function dateStart(property: unknown): string | null {
   const value = property as { date?: { start?: string } | null };
@@ -168,6 +169,17 @@ export async function getEmployeeInspections(employeeId: string): Promise<Inspec
       score: number(properties["Score (%)"]),
       date: dateStart(properties.Date),
     }];
+  });
+}
+
+export async function getEmployeePenalties(employeeId: string): Promise<PenaltyRecord[]> {
+  if (!notion) return [];
+  const response = await notion.databases.query({ database_id: "ee35a70e-67dc-4e20-93b4-a10a772c7e3e", filter: { property: "Employee", relation: { contains: employeeId } }, sorts: [{ property: "Date", direction: "descending" }], page_size: 20 });
+  return response.results.flatMap((page) => {
+    if (!("properties" in page)) return [];
+    const properties = page.properties as Record<string, unknown>;
+    const severity = properties.Severity as { select?: { name?: string } | null };
+    return [{ id: page.id, title: text(properties.Violation) ?? "KPI штраф", deduction: number(properties["KPI Deduction"]) ?? 0, reason: text(properties.Description) ?? "—", date: dateStart(properties.Date), severity: severity.select?.name ?? "Minor" }];
   });
 }
 
