@@ -5,12 +5,12 @@ import { LanguageSwitch, useLanguage } from "@/components/language";
 
 type PanelState =
   | { kind: "loading" }
-  | { kind: "ready"; name: string; status: string; coins: number; level: number }
+  | { kind: "ready"; name: string; status: string; coins: number; level: number; role: string | null }
   | { kind: "unlinked"; telegramId: number }
   | { kind: "error"; message: string };
 type CheckIn = { id?: string; checkInTime: string; distanceMeters: number; status: string; branch?: string; alreadyCheckedIn?: boolean };
-type Dashboard = { attendance: CheckIn[]; inspections: { id: string; title: string; status: string; score: number | null; date: string | null }[]; kpi: { score: number | null; branchScore: number | null; eligible: boolean; status: string; period: string | null } | null; yearKpi: number | null };
-type Panel = "attendance" | "inspections" | "kpi" | null;
+type Dashboard = { attendance: CheckIn[]; inspections: { id: string; title: string; status: string; score: number | null; date: string | null }[]; penalties: { id: string; title: string; deduction: number; reason: string; date: string | null; severity: string }[]; kpi: { score: number | null; branchScore: number | null; eligible: boolean; status: string; period: string | null } | null; yearKpi: number | null };
+type Panel = "attendance" | "inspections" | "kpi" | "penalties" | null;
 
 declare global { interface Window { Telegram?: { WebApp?: { ready(): void; expand(): void; initData: string } } } }
 
@@ -36,7 +36,7 @@ export default function HomePage() {
       .then(({ ok, body }) => {
         if (!ok) throw new Error(body.error ?? "Не удалось открыть профиль.");
         if (body.status === "unlinked") { setState({ kind: "unlinked", telegramId: body.telegramId }); return; }
-        setState({ kind: "ready", name: body.employee.fullName, status: body.employee.status, coins: body.employee.coinBalance, level: body.employee.level });
+        setState({ kind: "ready", name: body.employee.fullName, status: body.employee.status, coins: body.employee.coinBalance, level: body.employee.level, role: body.employee.role });
         return fetch("/api/dashboard", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ initData: app.initData }) });
       })
       .then(async (response) => { if (!response) return; const body = await response.json(); if (response.ok) setDashboard(body); })
@@ -58,7 +58,7 @@ export default function HomePage() {
 
   function choose(action: string) {
     if (action === "checkin") handleCheckIn();
-    else if (action === "attendance" || action === "inspections" || action === "kpi") setPanel(panel === action ? null : action);
+    else if (action === "attendance" || action === "inspections" || action === "kpi" || action === "penalties") setPanel(panel === action ? null : action);
     else window.location.href = action;
   }
 
@@ -70,11 +70,12 @@ export default function HomePage() {
       <header className="game-header"><div className="owl-coins">🦉 <strong>{state.coins}</strong></div><div className="user-status"><strong>{state.name}</strong><span>● {state.status}</span></div></header>
       <section className="stats-card"><div><span>{t("currentKpi")}</span><strong>{dashboard?.kpi?.score ?? "—"}%</strong></div><div><span>{t("yearKpi")}</span><strong>{dashboard?.yearKpi ?? "—"}%</strong></div><div><span>{t("level")}</span><strong>{state.level}</strong></div></section>
       {checkIn && <section className="card success"><p className="eyebrow">{checkIn.alreadyCheckedIn ? "УЖЕ ОТМЕЧЕН" : "ОТМЕТКА СОХРАНЕНА"}</p><h2>{new Date(checkIn.checkInTime).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" })}</h2><p>{checkIn.branch ? `${checkIn.branch} · ` : ""}{Math.round(checkIn.distanceMeters)} м от точки филиала</p></section>}
-      <section className="menu-grid">{menu.map(([icon, label, action]) => <button className="menu-tile" key={label} onClick={() => choose(action)} disabled={action === "checkin" && (checkingIn || Boolean(checkIn))}><span>{action === "checkin" && checkingIn ? "⌛" : icon}</span><small>{action === "checkin" && checkIn ? t("alreadyWork") : t(label)}</small></button>)}</section>
+      <section className="menu-grid">{menu.map(([icon, label, action]) => <button className="menu-tile" key={label} onClick={() => choose(action)} disabled={action === "checkin" && (checkingIn || Boolean(checkIn))}><span>{action === "checkin" && checkingIn ? "⌛" : icon}</span><small>{action === "checkin" && checkIn ? t("alreadyWork") : t(label)}</small></button>)}{state.role === "3d045c82-95cf-81df-a96f-f6ee6648a28a" && <button className="menu-tile penalty-tile" onClick={() => choose("/penalties")}><span>⚠️</span><small>{t("penalties")}</small></button>}</section>
       <LanguageSwitch lang={lang} setLang={setLang} label={t("language")} />
       {panel === "attendance" && <section className="card details"><h2>{t("recentAttendance")}</h2>{dashboard?.attendance.length ? dashboard.attendance.map((item, index) => <p key={item.id ?? index}>{new Date(item.checkInTime).toLocaleString(lang === "az" ? "az-AZ" : "ru-RU", { timeZone: "Asia/Baku", day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })} · {item.status} · {Math.round(item.distanceMeters)} m</p>) : <p>{t("noAttendance")}</p>}</section>}
       {panel === "inspections" && <section className="card details"><h2>{t("myChecks")}</h2>{dashboard?.inspections.length ? dashboard.inspections.map((item) => <p key={item.id}><strong>{item.title}</strong><br />{item.status}{item.score !== null ? ` · ${item.score}%` : ""}{item.date ? ` · ${new Date(item.date).toLocaleDateString(lang === "az" ? "az-AZ" : "ru-RU")}` : ""}</p>) : <p>{t("noChecks")}</p>}</section>}
       {panel === "kpi" && <section className="card details"><h2>{t("myKpi")}</h2>{dashboard?.kpi ? <p><strong>{dashboard.kpi.score ?? "—"}%</strong><br />{t("branchKpi")}: {dashboard.kpi.branchScore ?? "—"}%<br />{t("eligible")}: {dashboard.kpi.eligible ? t("yes") : t("no")}</p> : <p>KPI —</p>}</section>}
+      {panel === "penalties" && <section className="card details"><h2>{t("penalties")}</h2>{dashboard?.penalties.length ? dashboard.penalties.map((item) => <p key={item.id}><strong>−{item.deduction}% · {item.title}</strong><br />{item.reason}{item.date ? ` · ${new Date(item.date).toLocaleDateString(lang === "az" ? "az-AZ" : "ru-RU")}` : ""}</p>) : <p>{t("noPenalties")}</p>}</section>}
     </>}
   </main>;
 }
