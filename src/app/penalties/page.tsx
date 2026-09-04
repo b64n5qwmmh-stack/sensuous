@@ -10,7 +10,7 @@ export default function PenaltiesPage() {
   const [deduction, setDeduction] = useState("5"); const [reason, setReason] = useState(""); const [severity, setSeverity] = useState<"Minor" | "Major" | "Critical">("Minor");
   const [message, setMessage] = useState(""); const [saving, setSaving] = useState(false);
   const initData = typeof window === "undefined" ? "" : window.Telegram?.WebApp?.initData ?? "";
-  useEffect(() => { if (!initData) { setMessage(t("openTelegram")); return; } fetch(`/api/penalties?initData=${encodeURIComponent(initData)}`).then(async r => ({ ok: r.ok, body: await r.json() })).then(({ ok, body }) => { if (!ok) throw new Error(body.error); setEmployees(body.employees); }).catch(e => setMessage(e instanceof Error ? e.message : "Ошибка доступа")); }, [initData, t]);
+  useEffect(() => { if (!initData) { setMessage(t("openTelegram")); return; } fetch(`/api/penalties?initData=${encodeURIComponent(initData)}`).then(async r => ({ ok: r.ok, body: await r.json() })).then(({ ok, body }) => { if (!ok) throw new Error(body.error); setEmployees(body.employees); }).catch(e => setMessage(e instanceof Error ? e.message : "Ошибка доступа")); }, [initData, lang]);
   async function submit() {
     setSaving(true); setMessage("");
     const response = await fetch("/api/penalties", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ initData, employeeId, deduction: Number(deduction), reason, severity }) });
