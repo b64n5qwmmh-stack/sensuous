@@ -55,6 +55,7 @@ textarea { min-height: 112px; resize: vertical; }
 .menu-tile small { color: #edf5e9; font-size: .84rem; line-height: 1.2; }
 .penalty-tile { border-color: #a8664a; background: linear-gradient(135deg, #48261f, #271916); }
 .hint { font-size: .9rem; margin-top: -4px; }.penalty-form { margin-top: 18px; }
+.penalties-title { margin-top: 22px; padding-top: 16px; border-top: 1px solid #394236; font-size: 1.1rem; }
 .language-switch { display: flex; align-items: center; justify-content: flex-end; gap: 7px; margin-top: 20px; color: #a8ada2; font-size: .78rem; }
 .language-switch button { min-height: 34px; padding: 0 10px; border-radius: 10px; font-size: .74rem; }
 .language-switch button.selected { color: #10120f; background: #a9e37c; border-color: #a9e37c; }
