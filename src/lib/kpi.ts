@@ -35,11 +35,12 @@ export async function refreshMonthlyKpi(input: { employeeId: string; employeeNam
   });
   const scores = inspections.results.flatMap((page) => "properties" in page ? [number(page.properties["Score (%)"])] : []).filter((value): value is number => value !== null);
   const qualityScore = scores.length ? Math.round(scores.reduce((sum, value) => sum + value, 0) / scores.length) : 0;
+  // Penalties are an optional enhancement: a missing Notion share must never block KPI from inspections.
   const violations = await notion.databases.query({ database_id: VIOLATIONS, filter: { and: [
     { property: "Employee", relation: { contains: input.employeeId } },
     { property: "Date", date: { on_or_after: period.start } },
     { property: "Date", date: { before: period.end } },
-  ] }, page_size: 100 });
+  ] }, page_size: 100 }).catch(() => ({ results: [] }));
   const deduction = violations.results.reduce((sum, page) => sum + ("properties" in page ? number(page.properties["KPI Deduction"]) ?? 0 : 0), 0);
   const personalScore = Math.max(0, qualityScore - deduction);
 
