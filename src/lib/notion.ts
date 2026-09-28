@@ -85,7 +85,7 @@ export async function getBranch(branchId: string): Promise<Branch> {
   return { id: page.id, name: text(properties["Branch Name"]) ?? "Unknown branch", latitude, longitude, radiusMeters };
 }
 
-export type CheckInRecord = { id: string; checkInTime: string; distanceMeters: number; status: string };
+export type CheckInRecord = { id: string; checkInTime: string; distanceMeters: number; status: string; employeeName?: string; branchName?: string };
 export type InspectionRecord = { id: string; title: string; status: string; score: number | null; date: string | null };
 export type KpiRecord = { score: number | null; branchScore: number | null; eligible: boolean; status: string; period: string | null };
 export type PenaltyRecord = { id: string; title: string; deduction: number; reason: string; date: string | null; severity: string };
@@ -148,6 +148,36 @@ export async function getRecentCheckIns(employeeId: string): Promise<CheckInReco
       status: select?.select?.name ?? "Unknown",
     }];
   });
+}
+
+export async function getCompanyRecentCheckIns(): Promise<CheckInRecord[]> {
+  if (!notion || !env.NOTION_ATTENDANCE_DATA_SOURCE_ID) return [];
+  const response = await notion.databases.query({
+    database_id: env.NOTION_ATTENDANCE_DATA_SOURCE_ID,
+    sorts: [{ property: "Check-in Time", direction: "descending" }],
+    page_size: 50,
+  });
+  const rows = await Promise.all(response.results.filter((page): page is typeof page & { properties: Record<string, unknown> } => "properties" in page).map(async (page) => {
+    const properties = page.properties;
+    const checkInTime = dateStart(properties["Check-in Time"]);
+    if (!checkInTime) return null;
+    const employeeId = (properties.Employee as { relation?: { id: string }[] })?.relation?.[0]?.id;
+    const branchId = (properties.Branch as { relation?: { id: string }[] })?.relation?.[0]?.id;
+    const [employee, branch] = await Promise.all([
+      employeeId ? notion.pages.retrieve({ page_id: employeeId }) : null,
+      branchId ? notion.pages.retrieve({ page_id: branchId }) : null,
+    ]);
+    const status = properties["Check-in Status"] as { select?: { name: string } | null };
+    return {
+      id: page.id,
+      checkInTime,
+      distanceMeters: number(properties["Distance from Branch (m)"]) ?? 0,
+      status: status.select?.name ?? "Unknown",
+      employeeName: employee && "properties" in employee ? text(employee.properties["Full Name"]) ?? "—" : "—",
+      branchName: branch && "properties" in branch ? text(branch.properties["Branch Name"]) ?? "—" : "—",
+    };
+  }));
+  return rows.filter((row): row is NonNullable<typeof row> => row !== null);
 }
 
 export async function getEmployeeInspections(employeeId: string): Promise<InspectionRecord[]> {
