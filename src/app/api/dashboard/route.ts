@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
   findEmployeeByTelegramId,
+  getCompanyRecentCheckIns,
   getEmployeeInspections,
   getEmployeePenalties,
   getLatestKpi,
@@ -8,6 +9,7 @@ import {
   getYearKpi,
 } from "@/lib/notion";
 import { validateTelegramInitData } from "@/lib/telegram";
+import { canAward } from "@/lib/overview";
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,14 +20,15 @@ export async function POST(request: NextRequest) {
     const employee = await findEmployeeByTelegramId(telegramUser.id);
     if (!employee) return NextResponse.json({ error: "Your Telegram ID is not linked to an employee." }, { status: 403 });
 
+    const isHead = await canAward(employee.role);
     const [attendance, inspections, penalties, kpi, yearKpi] = await Promise.all([
-      getRecentCheckIns(employee.id),
+      isHead ? getCompanyRecentCheckIns() : getRecentCheckIns(employee.id),
       getEmployeeInspections(employee.id),
       getEmployeePenalties(employee.id),
       getLatestKpi(employee.id),
       getYearKpi(employee.id),
     ]);
-    return NextResponse.json({ attendance, inspections, penalties, kpi, yearKpi });
+    return NextResponse.json({ attendance, inspections, penalties, kpi, yearKpi, companyAttendance: isHead });
   } catch (error) {
     return NextResponse.json({ error: error instanceof Error ? error.message : "Could not load dashboard." }, { status: 400 });
   }
